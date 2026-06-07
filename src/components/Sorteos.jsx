@@ -235,49 +235,7 @@ export default function Sorteos() {
           </div>
         )}
       </section>
-
-      {/* Tabla de sorteos con números ganadores y edición en caliente */}
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full text-xs text-slate-700">
-          <thead>
-            <tr className="bg-slate-50">
-              <th className="p-2">N° Sorteo</th>
-              <th className="p-2">Sorteo</th>
-              <th className="p-2">Apuestas</th>
-              <th className="p-2">Importe Neto</th>
-              <th className="p-2">Premios Pagados</th>
-              <th className="p-2">Tickets Ganadores</th>
-              <th className="p-2">Números Ganadores</th>
-              <th className="p-2">Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorteos.map((s, i) => (
-              <tr key={i} className="even:bg-slate-50">
-                <td className="p-2 font-mono font-bold text-blue-700">{s.numero}</td>
-                <td className="p-2">{s.sorteo}</td>
-                <td className="p-2 text-right">{s.ap}</td>
-                <td className="p-2 text-right">${s.neto.toLocaleString()}</td>
-                <td className="p-2 text-right">${s.premios.toLocaleString()}</td>
-                <td className="p-2 text-right">{s.ganadores}</td>
-                <td className="p-2 text-center">
-                  <span className="flex gap-1 justify-center">
-                    {s.numeros.map((n,ni)=>(
-                      <span key={ni} className="bg-slate-200 px-2 py-0.5 rounded text-xs font-black text-blue-700">
-                        {n.toString().padStart(4, '0')}
-                      </span>
-                    ))}
-                  </span>
-                </td>
-                <td className="p-2 text-center">
-                  <button onClick={()=>abrirEditarSorteo(i)} className="text-blue-600 hover:text-blue-800"><Edit2 size={16}/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
+      
       <div className="flex gap-4 mt-2">
         <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-black shadow hover:bg-blue-700">Navegar Sorteos</button>
         <button className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-black shadow">Automatizar Avance</button>

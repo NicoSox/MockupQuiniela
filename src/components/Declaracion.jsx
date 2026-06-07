@@ -5,7 +5,7 @@ const data = [
   { sub:'002', nombre:'Lopez, Jorge Jose',            domicilio:'Bs.As. N°118 - Concepc.',        cuit:'20-22556395-1', afip:'Autónomo',  matutina:10316170, vespertina:7834060, siesta:4536570, tarde:4397000, nocturno:8350715, total:35434515, comision:4252129.8, dgr:276388.44, autom:148824.54 },
   { sub:'003', nombre:'Molina, Sandra Isabel',        domicilio:'Centenario N°28',                cuit:'27-34765048-5', afip:'Monotrib.', matutina:4271200,  vespertina:4005250, siesta:2653500, tarde:2675350, nocturno:4320400, total:17925700, comision:2151084,   dgr:139820.46, autom:75287.94  },
   { sub:'004', nombre:'Lopez Bertelli, Ramiro',       domicilio:'Alpachiri - Calle Principal',    cuit:'20-30070541-4', afip:'Monotrib.', matutina:3757500,  vespertina:4356900, siesta:2430780, tarde:2607200, nocturno:5839100, total:18991480, comision:2278977.6, dgr:148133.54, autom:79764.22  },
-  { sub:'005', nombre:'Medina, Fatima Cecilia',       domicilio:'Vicente Lopez y Planes N°469',   cuit:'23-28919962-2', afip:'Monotrib.', matutina:2999500,  vespertina:3598800, siesta:1785300, tarde:1837400, nocturno:2892000, total:13113000, comision:1573560,   dgr:102281.40, autom:55074.60  },
+  { sub:'005', nombre:'Medina, Fatima Cecilia',       domicilio:'V. Lopez y Planes N°469',        cuit:'23-28919962-2', afip:'Monotrib.', matutina:2999500,  vespertina:3598800, siesta:1785300, tarde:1837400, nocturno:2892000, total:13113000, comision:1573560,   dgr:102281.40, autom:55074.60  },
   { sub:'006', nombre:'Parsons, Monica Beatriz',      domicilio:'Catamarca N°881',                cuit:'23-29750573-4', afip:'Monotrib.', matutina:4586040,  vespertina:5082000, siesta:2448296, tarde:2532400, nocturno:6204379, total:20853115, comision:2502373.8, dgr:162654.30, autom:87583.08  },
   { sub:'007', nombre:'Lopez, Rodrigo Javier',        domicilio:'Almafuerte N°457',               cuit:'20-32110038-5', afip:'Monotrib.', matutina:5935050,  vespertina:5702400, siesta:2740400, tarde:2990000, nocturno:6004305, total:23372155, comision:2804658.6, dgr:182302.81, autom:98163.05  },
   { sub:'008', nombre:'Aranda, Carlos A.',            domicilio:'E.Padilla N°593 - Concepc.',     cuit:'20-08057122-5', afip:'Autónomo',  matutina:422900,   vespertina:436255,  siesta:67550,   tarde:275700,  nocturno:382795,  total:1585200,  comision:190224,    dgr:12364.56,  autom:6657.84   },
@@ -21,11 +21,10 @@ const data = [
 ];
 
 const fmt = (n) => {
-  if (n === null || n === undefined) return '—';
+  if (!n) return '—';
   const num = Number(n);
   if (num === 0) return '$0';
-  const dec = Number.isInteger(num) ? 0 : 2;
-  return '$' + num.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  return '$' + num.toLocaleString('es-AR', { minimumFractionDigits: num % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 });
 };
 
 const sum = (field) => data.reduce((acc, r) => acc + (r[field] || 0), 0);
@@ -34,199 +33,157 @@ export default function Declaracion() {
   return (
     <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif", background: '#eef2f8', minHeight: '100vh', padding: '18px 14px' }}>
       <style>{`
-      
-@media print {
-  @page { 
-    size: A4 landscape; 
-    margin: 10mm 5mm; 
-  }
-
-  html, body {
-    height: auto !important;
-    overflow: visible !important;
-    background: #fff !important;
-  }
-
-  /* Contenedor principal */
-  #dp {
-    height: auto !important;
-    overflow: visible !important;
-    position: static !important;
-  }
-
-  /* Oculta TODO lo que no querés imprimir */
-  .no-print {
-    display: none !important;
-  }
-
-  /* Evita sombras y cosas visuales */
-  .card {
-    box-shadow: none !important;
-    border: 1px solid #ddd !important;
-    page-break-inside: avoid;
-  }
-[style*="min-height"] {
-  min-height: auto !important;
-}
-  /* TABLA */
-  #tbl {
-    width: 100% !important;
-    table-layout: auto !important;
-  }
-
-  #tbl th, #tbl td {
-    font-size: 7.5px !important;
-    padding: 2px !important;
-    white-space: normal !important;
-  }
-
-  /* Evita cortes feos */
-  tr {
-    page-break-inside: avoid;
-  }
-
-  /* Layouts en grid */
-  .g2 {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-  }
-}
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 6mm 4mm;
+          }
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
+            background: #fff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          #dp-root {
+            height: auto !important;
+            overflow: visible !important;
+          }
+          .no-print { display: none !important; }
+          .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          [style*="min-height"] { min-height: auto !important; }
+          #tbl { width: 100% !important; }
+          #tbl th, #tbl td { font-size: 7px !important; padding: 2px !important; }
+          .g2 { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+          .g3 { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; }
+          .resumen-bloque { break-before: avoid; page-break-before: avoid; }
+          .firmas-bloque { break-before: avoid; page-break-before: avoid; }
+        }
 
         .card {
           background: #fff;
           border-radius: 9px;
           border: 1px solid #c6d4ea;
-          padding: 14px 18px;
-          margin-bottom: 12px;
+          padding: 12px 16px;
+          margin-bottom: 10px;
           box-shadow: 0 1px 5px rgba(13,43,107,.08);
         }
-
         .sec-hdr {
           display: flex; align-items: center; gap: 7px;
-          font-size: 11px; font-weight: 700; color: #0d2b6b;
+          font-size: 10px; font-weight: 700; color: #0d2b6b;
           text-transform: uppercase; letter-spacing: .5px;
-          padding-bottom: 7px; margin-bottom: 10px;
+          padding-bottom: 6px; margin-bottom: 8px;
           border-bottom: 2px solid #dce8f8;
         }
         .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-        /* Info rows */
-        .ir { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; border-bottom: 1px solid #edf2fa; gap: 10px; }
+        .ir { display: flex; justify-content: space-between; align-items: baseline; padding: 2px 0; border-bottom: 1px solid #edf2fa; gap: 8px; }
         .ir:last-child { border-bottom: none; }
-        .lbl { font-size: 11px; color: #5a6e96; white-space: nowrap; }
-        .val { font-size: 11px; font-weight: 600; font-family: 'Courier New', monospace; text-align: right; color: #1a2744; }
-        .ir.strong { border-top: 1.5px solid #9ab0d8; margin-top: 4px; padding-top: 5px; }
-        .ir.strong .lbl { font-size: 12px; font-weight: 700; color: #1a2744; }
-        .ir.strong .val { font-size: 12px; color: #0d2b6b; }
-
-        /* Main table */
-        #tbl { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11px; }
-        #tbl th {
-          background: #0d2b6b; color: #fff; font-weight: 600;
-          text-align: center; padding: 6px 3px;
-          border: 1px solid #1a3f8f;
-          font-size: 10px; line-height: 1.25;
-        }
-        #tbl td {
-          padding: 4px 4px; border: 1px solid #d0dcef;
-          vertical-align: middle; line-height: 1.3;
-          overflow: hidden;
-        }
+        .lbl { font-size: 10px; color: #5a6e96; white-space: nowrap; }
+        .val { font-size: 10px; font-weight: 600; font-family: 'Courier New', monospace; text-align: right; color: #1a2744; }
+        .ir.strong { border-top: 1.5px solid #9ab0d8; margin-top: 3px; padding-top: 4px; }
+        .ir.strong .lbl { font-size: 11px; font-weight: 700; color: #1a2744; }
+        .ir.strong .val { font-size: 11px; color: #0d2b6b; }
+        #tbl { width: 100%; border-collapse: collapse; font-size: 10px; }
+        #tbl th { background: #0d2b6b; color: #fff; font-weight: 600; text-align: center; padding: 5px 2px; border: 1px solid #1a3f8f; font-size: 9px; line-height: 1.2; }
+        #tbl td { padding: 3px 3px; border: 1px solid #d0dcef; vertical-align: middle; line-height: 1.2; }
         #tbl tr:nth-child(even) td { background: #f3f7fd; }
         #tbl tr.vac td { color: #a0aec0; font-style: italic; }
         #tbl tr.tot td { background: #dce6f8; font-weight: 700; border-top: 2px solid #0d2b6b; }
-        #tbl .r { text-align: right; font-family: 'Courier New', monospace; font-size: 10.5px; white-space: nowrap; }
+        #tbl .r { text-align: right; font-family: 'Courier New', monospace; font-size: 9px; white-space: nowrap; }
         #tbl .c { text-align: center; }
         #tbl .sub { text-align: center; font-weight: 700; color: #0d2b6b; font-family: 'Courier New', monospace; }
         #tbl .tnm { color: #0d2b6b; font-weight: 700; }
-
-        /* Firma */
-        .fbox { border-top: 1.5px solid #0d2b6b; padding-top: 6px; text-align: center; }
-        .fbox .fl { font-size: 10px; color: #5a6e96; }
-        .fbox .fn { font-size: 11px; font-weight: 700; color: #1a2744; margin-top: 3px; }
+        .fbox { border-top: 1.5px solid #0d2b6b; padding-top: 5px; text-align: center; }
+        .fbox .fl { font-size: 9px; color: #5a6e96; }
+        .fbox .fn { font-size: 10px; font-weight: 700; color: #1a2744; margin-top: 2px; }
       `}</style>
 
-      <div id="dp">
-        {/* Botón */}
-        <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+      <div id="dp-root">
+        {/* Botón imprimir */}
+        <div className="no-print" style={{ display:'flex', justifyContent:'flex-end', marginBottom:10 }}>
           <button
             onClick={() => window.print()}
-            style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 700, padding: '7px 22px', background: '#0d2b6b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}
+            style={{ fontFamily:'inherit', fontSize:13, fontWeight:700, padding:'8px 24px', background:'#0d2b6b', color:'#fff', border:'none', borderRadius:6, cursor:'pointer' }}
           >
-            Imprimir / Guardar PDF
+            🖨 Imprimir / Guardar PDF
           </button>
         </div>
 
         {/* Cabecera */}
-        <div className="card" style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+        <div className="card" style={{ marginBottom:10 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:6 }}>
             <div>
-              <div style={{ fontSize: 19, fontWeight: 800, color: '#0d2b6b', textTransform: 'uppercase', letterSpacing: .8, borderBottom: '3px solid #e02020', paddingBottom: 3, display: 'inline-block' }}>
+              <div style={{ fontSize:17, fontWeight:800, color:'#0d2b6b', textTransform:'uppercase', letterSpacing:.8, borderBottom:'3px solid #e02020', paddingBottom:2, display:'inline-block' }}>
                 Lotería de Tucumán
               </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#1a6ac8', marginTop: 4 }}>Liquidación de Comisiones — Diciembre 2025</div>
-              <div style={{ fontSize: 11, color: '#5a6e96', marginTop: 2 }}>Concepción, 06 de Enero de 2026</div>
+              <div style={{ fontSize:12, fontWeight:600, color:'#1a6ac8', marginTop:3 }}>Liquidación de Comisiones — Diciembre 2025</div>
+              <div style={{ fontSize:10, color:'#5a6e96', marginTop:2 }}>Concepción, 06 de Enero de 2026</div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 17, fontWeight: 800, color: '#0d2b6b' }}>CONCESION N° 26</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#1a2744', marginTop: 2 }}>LOPEZ BERTELLI, MARTIN</div>
-              <div style={{ fontSize: 11, color: '#5a6e96' }}>CUIT: 20-24737694-2 · Resp. Inscripto</div>
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontSize:15, fontWeight:800, color:'#0d2b6b' }}>CONCESION N° 26</div>
+              <div style={{ fontSize:11, fontWeight:600, color:'#1a2744', marginTop:2 }}>LOPEZ BERTELLI, MARTIN</div>
+              <div style={{ fontSize:10, color:'#5a6e96' }}>CUIT: 20-24737694-2 · Resp. Inscripto</div>
             </div>
           </div>
         </div>
 
         {/* Juramento */}
-        <div style={{ fontSize: 11, color: '#4a5e8a', background: '#f0f5ff', border: '1px solid #c6d4ea', borderLeft: '3px solid #1a6ac8', borderRadius: 5, padding: '6px 12px', marginBottom: 12, lineHeight: 1.5 }}>
-          Declaro <strong style={{ color: '#0d2b6b' }}>bajo juramento</strong> que las comisiones devengadas por esta concesión en el mes indicado corresponden a la siguiente distribución:
+        <div style={{ fontSize:10, color:'#4a5e8a', background:'#f0f5ff', border:'1px solid #c6d4ea', borderLeft:'3px solid #1a6ac8', borderRadius:4, padding:'5px 10px', marginBottom:10, lineHeight:1.4 }}>
+          Declaro <strong style={{ color:'#0d2b6b' }}>bajo juramento</strong> que las comisiones devengadas por esta concesión en el mes indicado corresponden a la siguiente distribución:
         </div>
 
         {/* Info + retenciones */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }} className="g2">
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }} className="g2">
           <div className="card">
-            <div className="sec-hdr"><span className="dot" style={{ background: '#0d2b6b' }} />Datos del Concesionario</div>
-            {[['D.N.I.:', '24.737.694'], ['Domicilio:', '24 de Septiembre N°1435 — Concepción'], ['Inscripción AFIP-DGI:', '20-24737694-2'], ['Condición:', 'Responsable Inscripto'], ['Período:', 'Diciembre 2025']].map(([l, v]) => (
-              <div className="ir" key={l}><span className="lbl">{l}</span><span style={{ fontSize: 11, fontWeight: 600, textAlign: 'right', color: '#1a2744' }}>{v}</span></div>
+            <div className="sec-hdr"><span className="dot" style={{ background:'#0d2b6b' }}/>Datos del Concesionario</div>
+            {[['D.N.I.:','24.737.694'],['Domicilio:','24 de Septiembre N°1435 — Concepción'],['Inscripción AFIP-DGI:','20-24737694-2'],['Condición:','Responsable Inscripto'],['Período:','Diciembre 2025']].map(([l,v])=>(
+              <div className="ir" key={l}><span className="lbl">{l}</span><span style={{ fontSize:10, fontWeight:600, textAlign:'right', color:'#1a2744' }}>{v}</span></div>
             ))}
           </div>
           <div className="card">
-            <div className="sec-hdr"><span className="dot" style={{ background: '#e02020' }} />Retenciones del Período</div>
-            {[['Ret. Ingresos Brutos 6,5%:', '$2.688.914,49'], ['Ret. Impuesto Municipal 3%:', '—'], ['Ret. Impuesto Ganancias 2%:', '$277.293,46']].map(([l, v]) => (
+            <div className="sec-hdr"><span className="dot" style={{ background:'#e02020' }}/>Retenciones del Período</div>
+            {[['Ret. Ingresos Brutos 6,5%:','$2.688.914,49'],['Ret. Impuesto Municipal 3%:','—'],['Ret. Impuesto Ganancias 2%:','$277.293,46']].map(([l,v])=>(
               <div className="ir" key={l}><span className="lbl">{l}</span><span className="val">{v}</span></div>
             ))}
           </div>
         </div>
 
-        {/* Tabla */}
-        <div className="card">
-          <div className="sec-hdr"><span className="dot" style={{ background: '#1a6ac8' }} />Sub-Concesiones — Planilla de Pago</div>
-          <div style={{ overflowX: 'auto' }}>
+        {/* TABLA PRINCIPAL */}
+        <div className="card" style={{ marginBottom:10 }}>
+          <div className="sec-hdr"><span className="dot" style={{ background:'#1a6ac8' }}/>Sub-Concesiones — Planilla de Pago</div>
+          <div style={{ overflowX:'auto' }}>
             <table id="tbl">
               <colgroup>
-                <col style={{ width: '3.5%' }} /><col style={{ width: '13%' }} /><col style={{ width: '10.5%' }} />
-                <col style={{ width: '8.5%' }} /><col style={{ width: '5.5%' }} />
-                <col style={{ width: '7%' }} /><col style={{ width: '7%' }} /><col style={{ width: '6%' }} />
-                <col style={{ width: '6.5%' }} /><col style={{ width: '6.5%' }} />
-                <col style={{ width: '8%' }} /><col style={{ width: '7.5%' }} />
-                <col style={{ width: '6%' }} /><col style={{ width: '5%' }} /><col style={{ width: '6.5%' }} />
+                <col style={{ width:'3%' }}/><col style={{ width:'12%' }}/><col style={{ width:'10%' }}/>
+                <col style={{ width:'8%' }}/><col style={{ width:'5%' }}/>
+                <col style={{ width:'7%' }}/><col style={{ width:'7%' }}/><col style={{ width:'6%' }}/>
+                <col style={{ width:'6%' }}/><col style={{ width:'6%' }}/>
+                <col style={{ width:'8%' }}/><col style={{ width:'7%' }}/>
+                <col style={{ width:'6%' }}/><col style={{ width:'5%' }}/><col style={{ width:'6%' }}/>
               </colgroup>
               <thead>
                 <tr>
-                  <th>Sub N°</th><th>Apellido y Nombre</th><th>Domicilio</th>
-                  <th>CUIT N°</th><th>AFIP</th>
+                  <th>N°</th><th>Apellido y Nombre</th><th>Domicilio</th>
+                  <th>CUIT</th><th>AFIP</th>
                   <th>Matutina</th><th>Vespertina</th><th>Siesta</th>
-                  <th>De la Tarde</th><th>Nocturno</th>
+                  <th>Tarde</th><th>Nocturno</th>
                   <th>Total</th><th>Comisión</th>
-                  <th>D.G.R.</th><th>SI.CO.RE</th><th>3,5% Autom.</th>
+                  <th>D.G.R.</th><th>SICORE</th><th>3,5% Aut.</th>
                 </tr>
               </thead>
               <tbody>
-                {data.map((d, i) => (
-                  <tr key={i} className={d.nombre === 'VACANTE' ? 'vac' : ''}>
+                {data.map((d,i)=>(
+                  <tr key={i} className={d.nombre==='VACANTE'?'vac':''}>
                     <td className="sub">{d.sub}</td>
-                    <td style={{ fontSize: 11 }}>{d.nombre}</td>
-                    <td style={{ fontSize: 9.5, color: '#5a6e96' }}>{d.domicilio || '—'}</td>
-                    <td style={{ fontSize: 9, fontFamily: 'Courier New', color: '#5a6e96' }}>{d.cuit || '—'}</td>
-                    <td className="c" style={{ fontSize: 9.5 }}>{d.afip || '—'}</td>
+                    <td style={{ fontSize:9 }}>{d.nombre}</td>
+                    <td style={{ fontSize:8, color:'#5a6e96' }}>{d.domicilio||'—'}</td>
+                    <td style={{ fontSize:8, fontFamily:'Courier New', color:'#5a6e96' }}>{d.cuit||'—'}</td>
+                    <td className="c" style={{ fontSize:8.5 }}>{d.afip||'—'}</td>
                     <td className="r">{fmt(d.matutina)}</td>
                     <td className="r">{fmt(d.vespertina)}</td>
                     <td className="r">{fmt(d.siesta)}</td>
@@ -240,7 +197,7 @@ export default function Declaracion() {
                   </tr>
                 ))}
                 <tr className="tot">
-                  <td colSpan={5} style={{ textAlign: 'right', paddingRight: 8, color: '#0d2b6b' }}>TOTALES</td>
+                  <td colSpan={5} style={{ textAlign:'right', paddingRight:6, color:'#0d2b6b', fontSize:9 }}>TOTALES</td>
                   <td className="r">{fmt(sum('matutina'))}</td>
                   <td className="r">{fmt(sum('vespertina'))}</td>
                   <td className="r">{fmt(sum('siesta'))}</td>
@@ -257,11 +214,11 @@ export default function Declaracion() {
           </div>
         </div>
 
-        {/* Resumen */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }} className="g2">
+        {/* Resumen + Comisiones */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }} className="g2 resumen-bloque">
           <div className="card">
-            <div className="sec-hdr"><span className="dot" style={{ background: '#0d2b6b' }} />Resumen de Apuestas — Concesión N° 26</div>
-            {[['Sub-Conc. Matutina:', '$56.302.040'], ['Sub-Conc. Vespertina:', '$55.240.140'], ['Sub-Conc. Siesta:', '$29.496.346'], ['Sub-Conc. De la Tarde:', '$29.055.650'], ['Sub-Conc. Nocturno:', '$58.747.394']].map(([l, v]) => (
+            <div className="sec-hdr"><span className="dot" style={{ background:'#0d2b6b' }}/>Resumen de Apuestas — Concesión N° 26</div>
+            {[['Sub-Conc. Matutina:','$56.302.040'],['Sub-Conc. Vespertina:','$55.240.140'],['Sub-Conc. Siesta:','$29.496.346'],['Sub-Conc. De la Tarde:','$29.055.650'],['Sub-Conc. Nocturno:','$58.747.394']].map(([l,v])=>(
               <div className="ir" key={l}><span className="lbl">{l}</span><span className="val">{v}</span></div>
             ))}
             <div className="ir strong"><span className="lbl">Total Sub-Concesiones:</span><span className="val">$228.841.570</span></div>
@@ -269,8 +226,8 @@ export default function Declaracion() {
             <div className="ir strong"><span className="lbl">Total General:</span><span className="val">$258.549.470</span></div>
           </div>
           <div className="card">
-            <div className="sec-hdr"><span className="dot" style={{ background: '#1a6ac8' }} />Comisiones y Automatizaciones</div>
-            {[['Sub-Concesión:', '$27.460.976,40'], ['Concesión 16%:', '$13.906.938,80']].map(([l, v]) => (
+            <div className="sec-hdr"><span className="dot" style={{ background:'#1a6ac8' }}/>Comisiones y Automatizaciones</div>
+            {[['Sub-Concesión:','$27.460.976,40'],['Concesión 16%:','$13.906.938,80']].map(([l,v])=>(
               <div className="ir" key={l}><span className="lbl">{l}</span><span className="val">{v}</span></div>
             ))}
             <div className="ir strong"><span className="lbl">Total Comisiones:</span><span className="val">$41.367.915,20</span></div>
@@ -278,17 +235,17 @@ export default function Declaracion() {
             <div className="ir strong"><span className="lbl">Autom. Conc. 5%:</span><span className="val">$695.346,94</span></div>
             <div className="ir"><span className="lbl">Aut. Sub-Conc. 3%:</span><span className="val">$961.134,17</span></div>
             <div className="ir"><span className="lbl">Total Automatizaciones:</span><span className="val">$1.656.481,12</span></div>
-            <div className="ir strong"><span className="lbl">Neto a cobrar (est.):</span><span className="val" style={{ color: '#0d2b6b', fontWeight: 800 }}>$13.864.238,80</span></div>
+            <div className="ir strong"><span className="lbl">Neto a cobrar (est.):</span><span className="val" style={{ color:'#0d2b6b', fontWeight:800 }}>$13.864.238,80</span></div>
           </div>
         </div>
 
         {/* Firmas */}
-        <div className="card">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36 }}>
-            {[['Firma del Concesionario', 'LOPEZ BERTELLI, MARTIN'], ['Aclaración / Sello', ''], ['Firma y Sello Oficial', 'Lotería de Tucumán']].map(([l, n]) => (
+        <div className="card firmas-bloque">
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:28 }} className="g3">
+            {[['Firma del Concesionario','LOPEZ BERTELLI, MARTIN'],['Aclaración / Sello',''],['Firma y Sello Oficial','Lotería de Tucumán']].map(([l,n])=>(
               <div key={l} className="fbox">
                 <div className="fl">{l}</div>
-                <div className="fn">{n || '\u00A0'}</div>
+                <div className="fn">{n||'\u00A0'}</div>
               </div>
             ))}
           </div>
